@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build:css": "npx tsx scripts/generate-css.ts",
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -35,6 +36,9 @@
   "author": "Sébastien Bosmans <https://github.com/boseba>",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^24.2.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   }
 }
