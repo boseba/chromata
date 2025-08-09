@@ -33,11 +33,7 @@ async function generateCSS() {
           continue;
         }
 
-        let css = `.chromata.${themeName} {\n`;
-        for (const [marker, color] of Object.entries(theme)) {
-          css += `  .${marker} { color: ${color}; }\n`;
-        }
-        css += "}\n";
+        let css = theme.toString();
 
         // Write the CSS file
         fs.mkdirSync(DIST_DIR, { recursive: true });

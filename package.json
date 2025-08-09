@@ -35,6 +35,9 @@
   ],
   "author": "Sébastien Bosmans <https://github.com/boseba>",
   "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  },
   "devDependencies": {
     "@types/node": "^24.2.1",
     "ts-node": "^10.9.2",
