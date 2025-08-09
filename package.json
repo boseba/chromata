@@ -1,19 +1,35 @@
 {
   "name": "chromata",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A modern, extensible, fast syntax highlighter for code. Lightweight, pluggable, and themeable.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "module": "dist/index.js",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:css": "npx tsx scripts/generate-css.ts",
+    "lint": "eslint src tests --ext .ts",
+    "lint:fix": "eslint src tests --ext .ts --fix",
+    "test": "vitest run",
+    "test:dev": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "build": "tsup && npm run build:css",
+    "build:dev": "tsup --watch",
+    "build:css": "tsx scripts/generate-css.ts",
+    "build:prod": "npm run clean && npm run lint && npm run build",
+    "clean": "rimraf dist",
+    "check": "npm run lint && npm run test && npm run build",
     "prepare": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublishOnly": "npm run build:prod"
   },
   "repository": {
     "type": "git",
@@ -40,7 +56,9 @@
   },
   "devDependencies": {
     "@types/node": "^24.2.1",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   }
