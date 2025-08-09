@@ -1,6 +1,6 @@
 {
   "name": "chromata",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A modern, extensible, fast syntax highlighter for code. Lightweight, pluggable, and themeable.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -55,11 +55,14 @@
     "node": ">=16"
   },
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "@types/node": "^24.2.1",
+    "eslint": "^9.33.0",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0"
   }
 }
