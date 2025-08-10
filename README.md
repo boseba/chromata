@@ -1,13 +1,14 @@
 # Chromata
 
-Chromata is a modern, extensible, and fast syntax highlighter for code.
-Lightweight, pluggable, and themeable.
+Chromata is a modern, extensible, and fast syntax highlighter for code.  
+Lightweight, pluggable, and themeable.  
 Supports TypeScript, Angular, JavaScript, and more.
 
 ## Table of Contents
 
 - Key Principles
 - Installation
+- Usage
 - API Overview
 - Themes
 - Supported Languages
@@ -31,9 +32,45 @@ Supports TypeScript, Angular, JavaScript, and more.
 npm install chromata
 ```
 
+## Usage
+
+Chromata currently highlights a plain code string and outputs HTML.  
+The HTML contains `<span>` elements with token type classes (e.g., `keyword`, `string`, `comment`)  
+which are styled via a theme.
+
+```ts
+import { Chromata } from "chromata";
+
+// Initialize with default settings (TypeScript + vscode-dark)
+Chromata.init({
+  language: "typescript",
+  theme: "vscode-dark",
+  injectCss: true, // Automatically injects theme CSS into the browser <head>
+});
+
+// Highlight a TypeScript code string
+const code = `export class AuthService {}`;
+const html = Chromata.highlight(code);
+
+console.log(html);
+// Example output:
+// <span class="keyword">export</span> class AuthService {}
+```
+
+In a browser, if `injectCss` is enabled, Chromata will automatically inject the CSS for the selected theme.  
+If running server-side, you can retrieve the CSS with:
+
+```ts
+import { getTheme } from "chromata";
+
+const css = getTheme("vscode-dark").toString();
+```
+
+…and inject it manually in your page.
+
 ## API Overview
 
-Chromata provides functions to format code with syntax highlighting either as HTML strings or as DOM nodes.
+Chromata provides functions to format code with syntax highlighting either as HTML strings or as DOM nodes.  
 It is extensible through hooks and plugins, and supports multiple themes and languages.
 
 Full API documentation and usage examples will be added soon.
@@ -71,5 +108,3 @@ Chromata aims to provide a minimal yet powerful foundation for syntax highlighti
 MIT License
 
 © Sébastien Bosmans
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction...
