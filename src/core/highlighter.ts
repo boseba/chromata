@@ -1,3 +1,4 @@
+import { HtmlUtils } from "../utils/html";
 import { Grammar } from "./types/grammar";
 import { Token } from "./types/token";
 
@@ -8,12 +9,8 @@ export class Highlighter {
     return tokens
       .map(
         (token: Token) =>
-          `<span class="${token.type}">${escapeHtml(token.value)}</span>`
+          `<span class="${token.type}">${HtmlUtils.escape(token.value)}</span>`
       )
       .join("");
   }
-}
-
-function escapeHtml(s: string) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
