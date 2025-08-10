@@ -1,23 +1,32 @@
+import { getTheme } from "./core/theme-registry";
 import { ChromataInitOptions } from "./types/init-options";
 
 export * from "./types";
 
-export function init(options: ChromataInitOptions) {
-  const {
-    language = "typescript",
-    theme = "vscode-dark",
-    injectCss = true,
-  } = options;
+const isBrowser = typeof document !== "undefined";
 
-  if (injectCss) {
-    // Dynamically import theme and inject <style>
-    import(`./themes/${theme}.js`).then((themeModule) => {
-      const css = themeModule.default.toString();
+export const Chromata = {
+  init(options?: ChromataInitOptions) {
+    const chromataOptions = {
+      language: "typescript",
+      theme: "vscode-dark",
+      injectCss: true,
+      ...options,
+    };
+
+    if (chromataOptions.injectCss && isBrowser) {
+      const css = getTheme(chromataOptions.theme).toString();
+
+      document
+        .querySelectorAll(`style[data-chromata="${chromataOptions.theme}"]`)
+        .forEach((n) => n.remove());
+
       const style = document.createElement("style");
-
+      style.setAttribute("data-chromata", chromataOptions.theme);
       style.textContent = css;
-
       document.head.appendChild(style);
-    });
-  }
-}
+    }
+  },
+};
+
+export default Chromata;

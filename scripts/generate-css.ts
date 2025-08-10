@@ -33,13 +33,11 @@ async function generateCSS() {
           continue;
         }
 
-        let css = theme.toString();
-
         // Write the CSS file
         fs.mkdirSync(DIST_DIR, { recursive: true });
         const outFile = path.join(DIST_DIR, `chromata-${themeName}.css`);
 
-        fs.writeFileSync(outFile, css, "utf-8");
+        fs.writeFileSync(outFile, theme.toString(), "utf-8");
 
         console.log(`Generated: ${outFile}`);
       } catch (error) {

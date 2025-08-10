@@ -13,5 +13,6 @@ export default defineConfig({
   sourcemap: false,
   target: "es2019",
   skipNodeModulesBundle: true,
-  bundle: false,
+  bundle: true,
+  splitting: false,
 });
