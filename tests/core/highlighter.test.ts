@@ -25,7 +25,7 @@ describe("Highlighter", () => {
   });
 
   it("escapes inside span content as well", () => {
-    const code = '"a<b>" // c>d';
+    const code = "\"a<b>\" // c>d";
     const html = highlighter.highlight(code);
 
     // String token must contain escaped <

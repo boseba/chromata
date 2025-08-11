@@ -5,9 +5,9 @@ import Chromata, { type ChromataInitOptions } from "../src/index";
 
 describe("Public API (index)", () => {
   it("highlight() returns HTML for provided code", () => {
-    const html = Chromata.highlight(`const x = 1;`);
-    expect(html).toContain('<span class="keyword">const</span>');
-    expect(html).toContain('<span class="number">1</span>');
+    const html = Chromata.highlight("const x = 1;");
+    expect(html).toContain("<span class=\"keyword\">const</span>");
+    expect(html).toContain("<span class=\"number\">1</span>");
   });
 
   it("init() returns CSS for a chosen theme (no DOM injection on Node)", () => {

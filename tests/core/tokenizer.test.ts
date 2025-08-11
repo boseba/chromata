@@ -5,7 +5,7 @@ describe("Tokenizer behavior via TypeScriptGrammar", () => {
   const grammar = new TypeScriptGrammar();
 
   it("produces non-overlapping, left-to-right tokens", () => {
-    const code = '/*c*/"s" 123 if';
+    const code = "/*c*/\"s\" 123 if";
     const tokens = grammar.tokenize(code);
 
     // Ensure tokens are sorted and non-overlapping

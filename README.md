@@ -14,6 +14,8 @@ Modern, extensible, and fast syntax highlighter for code.
 # Chromata
 
 [![NPM version](https://img.shields.io/npm/v/chromata?style=flat-square)](https://www.npmjs.com/package/chromata)
+[![Coverage Status](https://coveralls.io/repos/github/boseba/chromata/badge.svg?branch=main)](https://coveralls.io/github/boseba/chromata?branch=main)
+
 
 Chromata is a modern, extensible, and fast syntax highlighter for code.  
 Lightweight, pluggable, and themeable.  
