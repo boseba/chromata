@@ -1,6 +1,6 @@
 {
   "name": "chromata",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A modern, extensible, fast syntax highlighter for code. Lightweight, pluggable, and themeable.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -8,13 +8,16 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "scripts": {

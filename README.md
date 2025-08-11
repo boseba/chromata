@@ -1,4 +1,19 @@
+<p align="center">
+<a href="https://www.npmjs.com/package/chromata">
+<img src="./assets/chromata.png" height="150">
+</a>
+</p>
+
+<h1 align="center">
+Chromata
+</h1>
+<p align="center">
+Modern, extensible, and fast syntax highlighter for code.  
+<p>
+
 # Chromata
+
+[![NPM version](https://img.shields.io/npm/v/chromata?style=flat-square)](https://www.npmjs.com/package/chromata)
 
 Chromata is a modern, extensible, and fast syntax highlighter for code.  
 Lightweight, pluggable, and themeable.  
