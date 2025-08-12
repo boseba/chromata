@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TypeScriptGrammar } from "../../src/grammars/typescript";
+import { TypeScriptGrammar } from "../../src/grammars/typescript/typescript";
 
 describe("TypeScriptGrammar", () => {
   const grammar = new TypeScriptGrammar();

@@ -1,96 +1,115 @@
-import { Grammar } from "./types/grammar";
-import { Token } from "./types/token";
+import { Match, Matcher, MatchInput, ScanContext, Token } from "./types";
 
-/**
- * Base tokenizer for syntax highlighting.
- *
- * Builds a single "master" RegExp from registered token patterns
- * (one named capture group per pattern) and scans the input in one pass.
- *
- * Extending classes (e.g., TypeScriptGrammar) add language-specific patterns
- * via `addPattern()`. Pattern order determines match priority.
- */
-export abstract class Tokenizer implements Grammar {
-  /** List of token type / regex pairs, in priority order. */
-  protected patterns: Array<[type: string, re: RegExp]> = [];
-
-  /** Cached compiled master RegExp, rebuilt when patterns change. */
-  private _regexp?: RegExp;
+export abstract class Tokenizer {
+  private readonly matchers: Matcher[] = [];
 
   /**
-   * Tokenizes a code string into a list of token spans.
-   *
-   * @param code - Source code to tokenize.
-   * @returns An array of tokens with start, end, and type.
+   * Register a matcher in priority order (earlier = higher priority).
    */
-  tokenize(code: string): Token[] {
-    const spans: Token[] = [];
-    const re = this.buildRegex();
-    const patterns = this.patterns;
-    let i = 0;
+  public addMatcher(matcher: Matcher): void {
+    this.matchers.push(matcher);
+  }
 
-    while (i < code.length) {
-      re.lastIndex = i;
-      const m = re.exec(code);
-      if (m) {
-        const start = m.index;
-        const end = re.lastIndex;
+  /**
+   * Tokenize input code using the registered matchers.
+   * The order of matchers defines precedence.
+   */
+  public tokenize(code: string): Token[] {
+    const source = this.preTokenize(code);
+    const tokens: Token[] = [];
 
-        // Identify the matched group name (token type)
-        const g = (m.groups || {}) as Record<string, string | undefined>;
-        let type: string | undefined;
-        for (const [name] of patterns) {
-          if (g[name]) {
-            type = name;
-            break;
-          }
+    let index = 0;
+
+    const context: ScanContext = {
+      previousToken: undefined,
+      previousNonWhitespaceToken: undefined,
+      peek: (offset: number): number | -1 => {
+        const position = index + offset;
+        if (position < 0 || position >= source.length) return -1;
+        return source.codePointAt(position) ?? -1;
+      },
+    };
+
+    while (index < source.length) {
+      const match = this.tryMatchers(source, index, context);
+      if (match) {
+        const token: Token = {
+          type: match.matcherName,
+          classes: match.classes,
+          start: index,
+          end: index + match.length,
+        };
+        tokens.push(token);
+
+        context.previousToken = token;
+        if (/\S/.test(source.slice(token.start, token.end))) {
+          context.previousNonWhitespaceToken = token;
         }
-        if (type) spans.push({ start, end, type });
 
-        i = end;
-        if (end === start) i++; // Prevent infinite loop on zero-width matches
-      } else {
-        i++;
+        index += match.length;
+        continue;
       }
+
+      // Fallback: emit one-char text token to guarantee progress
+      const fallback: Token = {
+        type: "text",
+        classes: ["text"],
+        start: index,
+        end: index + 1,
+      };
+      tokens.push(fallback);
+
+      context.previousToken = fallback;
+      if (/\S/.test(source[fallback.start])) {
+        context.previousNonWhitespaceToken = fallback;
+      }
+
+      index += 1;
     }
-    return spans;
+
+    return this.postTokenize(tokens, source);
   }
 
   /**
-   * Adds a token pattern to the tokenizer.
-   * Order matters: earlier patterns have higher priority.
-   * Invalidates the cached master regex.
+   * Pre-process code before tokenizing.
    */
-  protected addPattern(name: string, regexp: RegExp): void {
-    this.patterns.push([name, regexp]);
-    this._regexp = undefined;
+  protected preTokenize(code: string): string {
+    return code;
   }
 
   /**
-   * Builds (or returns cached) master RegExp combining all patterns.
-   * Adds `g` (global) and `y` (sticky) flags by default, preserving
-   * any flags from individual patterns.
+   * Post-process tokens.
    */
-  private buildRegex(extraFlags = ""): RegExp {
-    if (this._regexp) return this._regexp;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected postTokenize(tokens: Token[], code?: string): Token[] {
+    return tokens;
+  }
 
-    const flags = new Set<string>();
-    for (const [, regexp] of this.patterns) {
-      for (const flag of regexp.flags) {
-        flags.add(flag);
-      }
+  /**
+   * Try matchers in priority order at the given index.
+   * Returns the first successful match, or null if none matched.
+   */
+  private tryMatchers(
+    code: string,
+    index: number,
+    context: ScanContext
+  ): { matcherName: string; classes: string[]; length: number } | null {
+    const input: MatchInput = { code, index, context };
+
+    for (const matcher of this.matchers) {
+      const result: Match | null = matcher.match(input);
+      if (!result) continue;
+
+      const length = result.length ?? 0;
+      if (!Number.isFinite(length) || length <= 0) continue;
+
+      const classes = Array.isArray(result.classes)
+        ? [...matcher.classes, ...result.classes]
+        : [...matcher.classes];
+
+      return { matcherName: matcher.name, classes, length };
     }
 
-    flags.add("g");
-    flags.add("y");
-
-    for (const flag of extraFlags) flags.add(flag);
-
-    const source = this.patterns
-      .map(([name, regexp]) => `(?<${name}>${regexp.source})`)
-      .join("|");
-
-    this._regexp = new RegExp(source, [...flags].sort().join(""));
-    return this._regexp;
+    return null;
   }
 }

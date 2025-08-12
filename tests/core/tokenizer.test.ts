@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { TypeScriptGrammar } from "../../src/grammars/typescript";
+import { TypeScriptGrammar } from "../../src/grammars/typescript/typescript";
 
 describe("Tokenizer behavior via TypeScriptGrammar", () => {
   const grammar = new TypeScriptGrammar();
 
   it("produces non-overlapping, left-to-right tokens", () => {
-    const code = "/*c*/\"s\" 123 if";
+    const code = '/*c*/"s" 123 if';
     const tokens = grammar.tokenize(code);
 
     // Ensure tokens are sorted and non-overlapping

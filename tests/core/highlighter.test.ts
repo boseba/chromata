@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Highlighter } from "../../src/core/highlighter";
-import { TypeScriptGrammar } from "../../src/grammars/typescript";
+import { TypeScriptGrammar } from "../../src/grammars/typescript/typescript";
 
 describe("Highlighter", () => {
   const highlighter = new Highlighter(new TypeScriptGrammar());
@@ -25,7 +25,7 @@ describe("Highlighter", () => {
   });
 
   it("escapes inside span content as well", () => {
-    const code = "\"a<b>\" // c>d";
+    const code = '"a<b>" // c>d';
     const html = highlighter.highlight(code);
 
     // String token must contain escaped <

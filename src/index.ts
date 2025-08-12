@@ -3,7 +3,7 @@ export * from "./types";
 
 import { Highlighter } from "./core/highlighter";
 import { getTheme } from "./core/theme-registry";
-import { typeScriptGrammar } from "./grammars/typescript";
+import { typeScriptGrammar } from "./grammars/typescript/typescript";
 
 const isBrowser = typeof document !== "undefined";
 
