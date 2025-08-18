@@ -1,4 +1,3 @@
-// src/matchers/regexp-literal.matcher.ts
 import type { Match, Matcher, MatchInput, Token } from "../types";
 
 export class RegExpLiteralMatcher implements Matcher {
@@ -12,54 +11,48 @@ export class RegExpLiteralMatcher implements Matcher {
 
   public match({ code, index, context }: MatchInput): Match | null {
     // Must start with '/'
-    if (code.charCodeAt(index) !== 47) return null;
+    if (code.charCodeAt(index) !== 47 /* '/' */) return null;
 
+    // Language-specific gate: only attempt a regex when allowed by context
     const previous = context.previousNonWhitespaceToken;
     const previousText = previous
       ? code.slice(previous.start, previous.end)
       : undefined;
     if (!this.allowsAfter(previous, previousText)) return null;
 
-    // Parse /pattern/flags with escapes and character classes
+    // Scan /pattern/ with escapes and character classes
     let cursor = index + 1;
+    let inClass = false;
     let inEscape = false;
-    let inCharClass = false;
 
     while (cursor < code.length) {
-      const charCode = code.charCodeAt(cursor);
+      const codePoint = code.charCodeAt(cursor);
 
       if (!inEscape) {
-        if (charCode === 91) {
-          // '['
-          inCharClass = true;
-        } else if (charCode === 93) {
-          // ']'
-          inCharClass = false;
-        } else if (charCode === 47 && !inCharClass) {
-          // '/' closes the regex
+        if (codePoint === 91) inClass = true; // '['
+        else if (codePoint === 93) inClass = false; // ']'
+        else if (codePoint === 47 && !inClass) {
+          // closing '/'
           cursor += 1;
           break;
-        } else if (!inCharClass && (charCode === 10 || charCode === 13)) {
-          // Line terminators are not allowed in regex literal (outside char class)
-          return null;
         }
       }
 
-      inEscape = !inEscape && charCode === 92; // '\'
+      inEscape = !inEscape && codePoint === 92; // '\'
       cursor += 1;
     }
 
-    // No closing '/' found
+    // No closing '/', or empty pattern -> not a regex literal
     if (cursor <= index + 1 || cursor > code.length) return null;
 
-    // Parse flags [a-z]*
+    // Flags: a..z letters
     while (cursor < code.length) {
-      const flagCode = code.charCodeAt(cursor);
-      if (flagCode >= 97 && flagCode <= 122) {
+      const flag = code.charCodeAt(cursor);
+      if (flag >= 97 && flag <= 122) {
         cursor += 1;
-      } else {
-        break;
+        continue;
       }
+      break;
     }
 
     return { length: cursor - index };

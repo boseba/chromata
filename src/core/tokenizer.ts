@@ -30,7 +30,30 @@ export abstract class Tokenizer {
       },
     };
 
+    // util: fast check for common whitespace codepoints
+    const isWhitespace = (cp: number): boolean =>
+      cp === 32 /* space */ ||
+      cp === 9 /* tab */ ||
+      cp === 10 /* \n */ ||
+      cp === 13 /* \r */ ||
+      cp === 12 /* \f */ ||
+      cp === 11; /* \v */
+
     while (index < source.length) {
+      // --- SKIP contiguous whitespace (no token emitted) ---
+      if (isWhitespace(source.charCodeAt(index))) {
+        let cursor = index + 1;
+        while (
+          cursor < source.length &&
+          isWhitespace(source.charCodeAt(cursor))
+        ) {
+          cursor += 1;
+        }
+        // simply advance index; don't change previousNonWhitespaceToken
+        index = cursor;
+        continue;
+      }
+
       const match = this.tryMatchers(source, index, context);
       if (match) {
         const token: Token = {
@@ -42,6 +65,7 @@ export abstract class Tokenizer {
         tokens.push(token);
 
         context.previousToken = token;
+        // only update previousNonWhitespaceToken if token contains visible non-space chars
         if (/\S/.test(source.slice(token.start, token.end))) {
           context.previousNonWhitespaceToken = token;
         }
@@ -50,7 +74,7 @@ export abstract class Tokenizer {
         continue;
       }
 
-      // Fallback: emit one-char text token to guarantee progress
+      // Fallback: one-char text token
       const fallback: Token = {
         type: "text",
         classes: ["text"],

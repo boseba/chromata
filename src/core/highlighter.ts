@@ -1,4 +1,4 @@
-import { Html } from "../utils/html";
+import { HtmlUtils } from "../utils/html";
 import { Grammar } from "./types/grammar";
 
 /**
@@ -23,17 +23,17 @@ export class Highlighter {
     for (const token of tokens) {
       // Emit unhighlighted text before the current token
       if (cursor < token.start) {
-        html += Html.escape(code.slice(cursor, token.start));
+        html += HtmlUtils.escape(code.slice(cursor, token.start));
       }
       // Emit the highlighted token span
       const chunk = code.slice(token.start, token.end);
-      html += `<span class="${token.type}">${Html.escape(chunk)}</span>`;
+      html += `<span class="${token.type}">${HtmlUtils.escape(chunk)}</span>`;
       cursor = token.end;
     }
 
     // Emit any trailing unhighlighted text
     if (cursor < code.length) {
-      html += Html.escape(code.slice(cursor));
+      html += HtmlUtils.escape(code.slice(cursor));
     }
 
     return html;

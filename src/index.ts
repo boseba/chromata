@@ -1,5 +1,5 @@
-import { ChromataInitOptions } from "./types/init-options";
-export * from "./types";
+import { ChromataInitOptions } from "./public/init-options";
+export * from "./public";
 
 import { Highlighter } from "./core/highlighter";
 import { getTheme } from "./core/theme-registry";

@@ -1,3 +1,4 @@
+// src/grammars/typescript/typescript.ts
 import { BracketMatcher, RegExpMatcher } from "../../core/matchers";
 import { RegExpLiteralMatcher } from "../../core/matchers/regexp-literal-matcher";
 import { Tokenizer } from "../../core/tokenizer";
@@ -33,45 +34,12 @@ export class TypeScriptGrammar extends Tokenizer {
       />>>=|>>>|<<=|>>=|\?\?=|\|\|=|&&=|\*\*=|===|!==|=>|<=|>=|\+\+|--|\|\||&&|\?\?|<<|>>>|>>|\+=|-=|\*=|\/=|%=|\^=|&=|\|=|!=|==|\.\.\.|[+\-*/%&|^~!?<>:=]/;
     const PUNCTUATION = /[.,;:]/; // brackets excluded
 
-    // Language-specific predicate for RegExp literal
-    const KEYWORDS_ALLOWING_EXPR = new Set([
-      "return",
-      "case",
-      "throw",
-      "typeof",
-      "delete",
-      "void",
-      "new",
-    ]);
-    const OPENING_BRACKETS = new Set(["(", "{", "["]);
-    const SEPARATORS = new Set([",", ":", ";"]);
+    // identifier matcher (simple ASCII identifier)
+    const IDENTIFIER = /[A-Za-z_$][\w$]*/;
 
-    const allowsRegExpAfter = (
-      previous?: Token,
-      previousText?: string
-    ): boolean => {
-      if (!previous) return true;
-      if (previous.type === "operator") return true;
-      if (
-        previous.type === "keyword" &&
-        previousText &&
-        KEYWORDS_ALLOWING_EXPR.has(previousText)
-      )
-        return true;
-      if (
-        previous.type === "bracket" &&
-        previousText &&
-        OPENING_BRACKETS.has(previousText)
-      )
-        return true;
-      if (
-        previous.type === "punctuation" &&
-        previousText &&
-        SEPARATORS.has(previousText)
-      )
-        return true;
-      return false;
-    };
+    // Fallbacks to avoid one-span-per-character when nothing else matches
+    // NOTE: no whitespace matcher here — whitespace is skipped by the tokenizer
+    const TEXT = /[^\s()[\]{}.,;:]+/;
 
     const matchersInPriority: Matcher[] = [
       new RegExpMatcher({
@@ -81,7 +49,8 @@ export class TypeScriptGrammar extends Tokenizer {
       }),
       new RegExpMatcher({ name: "string", classes: ["string"], regex: STRING }),
 
-      new RegExpLiteralMatcher(allowsRegExpAfter), // before number/operator
+      // Disambiguated regex literal; predicate supplied by this grammar
+      new RegExpLiteralMatcher(TypeScriptGrammar.allowsRegExpAfter),
 
       new RegExpMatcher({ name: "number", classes: ["number"], regex: NUMBER }),
       new RegExpMatcher({
@@ -110,6 +79,13 @@ export class TypeScriptGrammar extends Tokenizer {
         regex: DECORATOR,
       }),
 
+      // identifiers
+      new RegExpMatcher({
+        name: "identifier",
+        classes: ["identifier"],
+        regex: IDENTIFIER,
+      }),
+
       new RegExpMatcher({
         name: "operator",
         classes: ["operator"],
@@ -123,11 +99,65 @@ export class TypeScriptGrammar extends Tokenizer {
         classes: ["punctuation"],
         regex: PUNCTUATION,
       }),
+
+      // Fallback: plain text runs (no whitespace)
+      new RegExpMatcher({
+        name: "text",
+        classes: ["text"],
+        regex: TEXT,
+      }),
     ];
 
     for (const matcher of matchersInPriority) {
       this.addMatcher(matcher);
     }
+  }
+
+  // Language-specific predicate for RegExp literal disambiguation.
+  private static allowsRegExpAfter(
+    previous?: Token,
+    previousText?: string
+  ): boolean {
+    if (!previous) return true;
+
+    if (previous.type === "operator") return true;
+
+    const KEYWORDS_ALLOWING_EXPR = new Set([
+      "return",
+      "case",
+      "throw",
+      "typeof",
+      "delete",
+      "void",
+      "new",
+    ]);
+    if (
+      previous.type === "keyword" &&
+      previousText &&
+      KEYWORDS_ALLOWING_EXPR.has(previousText)
+    ) {
+      return true;
+    }
+
+    const OPENING_BRACKETS = new Set(["(", "{", "["]);
+    if (
+      previous.type === "bracket" &&
+      previousText &&
+      OPENING_BRACKETS.has(previousText)
+    ) {
+      return true;
+    }
+
+    const SEPARATORS = new Set([",", ":", ";"]);
+    if (
+      previous.type === "punctuation" &&
+      previousText &&
+      SEPARATORS.has(previousText)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
 

@@ -1,5 +1,3 @@
-// src/types/init-options.ts
-
 /**
  * Options for initializing Chromata.
  */
