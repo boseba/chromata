@@ -23,6 +23,8 @@ export class Theme {
    */
   toString(): string {
     let css = `.chromata.${this.name} {\n`;
+    css += `  background: ${this.markers["background"]}; color: ${this.markers["text"]};`;
+
     for (const [marker, color] of Object.entries(this.markers)) {
       css += `  .${marker} { color: ${color}; }\n`;
     }

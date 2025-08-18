@@ -9,6 +9,11 @@ const isBrowser = typeof document !== "undefined";
 
 // Single highlighter instance for MVP (default: TypeScript)
 const defaultHighlighter = new Highlighter(typeScriptGrammar);
+let chromataOptions: ChromataInitOptions = {
+  language: "typescript",
+  theme: "vscode-dark",
+  injectCss: true,
+};
 
 /**
  * Chromata main API.
@@ -30,12 +35,9 @@ export const Chromata = {
    * - Removes previously injected style tags for the same theme to prevent duplicates (e.g., on HMR).
    */
   init(options?: ChromataInitOptions) {
-    const chromataOptions = {
-      language: "typescript",
-      theme: "vscode-dark",
-      injectCss: true,
-      ...options,
-    };
+    if (options) {
+      Object.assign(chromataOptions, options);
+    }
 
     // TODO: when other grammars exist, switch on chromataOptions.language
 
@@ -48,7 +50,7 @@ export const Chromata = {
       // Inject theme CSS into <head>
       const css = getTheme(chromataOptions.theme).toString();
       const style = document.createElement("style");
-      style.setAttribute("data-chromata", chromataOptions.theme);
+      style.setAttribute("data-chromata", chromataOptions.theme as string);
       style.textContent = css;
       document.head.appendChild(style);
     }
@@ -61,7 +63,9 @@ export const Chromata = {
    * @returns HTML string with syntax highlighting.
    */
   highlight(code: string): string {
-    return defaultHighlighter.highlight(code ?? "");
+    const html = defaultHighlighter.highlight(code ?? "");
+
+    return `<pre><code class="chromata language-${chromataOptions.language} ${chromataOptions.theme}">${html}</code></pre>`;
   },
 };
 
